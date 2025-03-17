@@ -188,6 +188,7 @@ def plot_predictions(y_pred, y_true, title, ylabel):
     plt.ylabel(ylabel)
     plt.title(title)
     plt.legend()
+    plt.savefig(f"{title}.png")
     plt.show()
 
 plot_predictions(y_pred_close, y_true_close, "Transformer Model - Close Price Prediction", "Close Price ($)")
