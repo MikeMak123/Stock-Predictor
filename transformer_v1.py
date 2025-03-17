@@ -144,26 +144,55 @@ def evaluate(model, test_loader):
 y_pred, y_true = evaluate(model, test_loader)
 
 # 绘制预测 vs 真实数据对比
-def plot_predictions(y_pred, y_true, title):
+# def plot_predictions(y_pred, y_true, title):
+#     plt.figure(figsize=(12, 6))
+#     plt.plot(y_true[:, 0], label="True Close Price", color='blue')
+#     plt.plot(y_pred[:, 0], label="Predicted Close Price", color='red', linestyle='dashed')
+#     plt.xlabel("Time")
+#     plt.ylabel("Normalized Close Price")
+#     plt.title(f"{title} - Close Price Prediction")
+#     plt.legend()
+#     plt.show()
+
+#     plt.figure(figsize=(12, 6))
+#     plt.plot(y_true[:, 1], label="True Volume", color='blue')
+#     plt.plot(y_pred[:, 1], label="Predicted Volume", color='red', linestyle='dashed')
+#     plt.xlabel("Time")
+#     plt.ylabel("Normalized Volume")
+#     plt.title(f"{title} - Volume Prediction")
+#     plt.legend()
+#     plt.show()
+
+# plot_predictions(y_pred, y_true, "Transformer Model")
+
+# 反归一化函数
+def inverse_transform(scaler, data, feature_index):
+    """ 将归一化数据转换回原始值 """
+    data = np.array(data).reshape(-1, 1)
+    min_val = scaler.data_min_[feature_index]
+    max_val = scaler.data_max_[feature_index]
+    return data * (max_val - min_val) + min_val
+
+# 反归一化预测值
+y_pred_close = inverse_transform(scaler, y_pred[:, 0], feature_index=3)  # `close` 在 features 中的索引是 3
+y_pred_volume = inverse_transform(scaler, y_pred[:, 1], feature_index=4)  # `volume` 在 features 中的索引是 4
+y_true_close = inverse_transform(scaler, y_true[:, 0], feature_index=3)
+y_true_volume = inverse_transform(scaler, y_true[:, 1], feature_index=4)
+
+# 重新绘制曲线
+def plot_predictions(y_pred, y_true, title, ylabel):
     plt.figure(figsize=(12, 6))
-    plt.plot(y_true[:, 0], label="True Close Price", color='blue')
-    plt.plot(y_pred[:, 0], label="Predicted Close Price", color='red', linestyle='dashed')
+    plt.plot(y_true, label="True Values", color='blue')
+    plt.plot(y_pred, label="Predicted Values", color='red', linestyle='dashed')
     plt.xlabel("Time")
-    plt.ylabel("Normalized Close Price")
-    plt.title(f"{title} - Close Price Prediction")
+    plt.ylabel(ylabel)
+    plt.title(title)
     plt.legend()
     plt.show()
 
-    plt.figure(figsize=(12, 6))
-    plt.plot(y_true[:, 1], label="True Volume", color='blue')
-    plt.plot(y_pred[:, 1], label="Predicted Volume", color='red', linestyle='dashed')
-    plt.xlabel("Time")
-    plt.ylabel("Normalized Volume")
-    plt.title(f"{title} - Volume Prediction")
-    plt.legend()
-    plt.show()
+plot_predictions(y_pred_close, y_true_close, "Transformer Model - Close Price Prediction", "Close Price ($)")
+plot_predictions(y_pred_volume, y_true_volume, "Transformer Model - Volume Prediction", "Volume (shares)")
 
-plot_predictions(y_pred, y_true, "Transformer Model")
 
 # 关闭 TensorBoard
 writer.close()
