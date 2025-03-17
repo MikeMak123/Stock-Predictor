@@ -2,7 +2,8 @@
 Deep Learning program based on time sequential models to predict a stock(trading volume and close price) using data over the past years.
 
 ---
-data_source: Kaggle
+data_source: <a href='https://www.kaggle.com/datasets/meharshanali/amazon-stocks-2025'>Kaggle</a>
+
 
 ---
 
