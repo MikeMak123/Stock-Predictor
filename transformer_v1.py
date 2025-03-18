@@ -8,6 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
+import os
 
 '''
 为什么使用 Transformer？
@@ -121,7 +122,19 @@ for epoch in range(epochs):
     print(f"Epoch {epoch+1}/{epochs}, Loss: {total_loss/len(train_loader):.4f}, Train R²: {r2_train:.4f}")
     scheduler.step(total_loss / len(train_loader))
 
-# 评估模型
+
+# 保存最优模型
+best_mse = float('inf')  # 记录最优 MSE
+model_save_path = "v1_best_transformer_model.pth"
+
+def save_model(model, mse):
+    global best_mse
+    if mse < best_mse:
+        best_mse = mse
+        torch.save(model.state_dict(), model_save_path)
+        print(f"✅ New best model saved with MSE: {mse:.6f}")
+        
+# 评估并保存模型
 def evaluate(model, test_loader):
     model.eval()
     predictions, actuals = [], []
@@ -138,6 +151,13 @@ def evaluate(model, test_loader):
     r2_test = 1 - np.sum((predictions - actuals) ** 2) / np.sum((actuals - actuals.mean(axis=0)) ** 2)
     writer.add_scalar("Accuracy/test", r2_test)
     print(f"Test R²: {r2_test:.4f}")
+    
+    # 计算 MSE 误差
+    mse = np.mean((predictions - actuals) ** 2)
+    print(f"Test MSE: {mse:.6f}")
+
+    # 保存最优模型
+    save_model(model, mse)
 
     return predictions, actuals
 
